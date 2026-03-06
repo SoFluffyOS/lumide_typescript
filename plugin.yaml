@@ -1,0 +1,22 @@
+id: lumide_typescript
+name: 'TypeScript'
+description: 'TypeScript and JavaScript language support for Lumide IDE.'
+entry_point: 'bin/main.dart'
+
+activation_events:
+  - 'workspaceContains:tsconfig.json'
+  - 'workspaceContains:package.json'
+  - 'workspaceContains:*.ts'
+  - 'workspaceContains:*.js'
+
+permissions:
+  - shell:
+      - typescript-language-server
+      - node
+      - npm
+
+configuration:
+  - key: typescript-lsp.path
+    type: filePath
+    title: 'TypeScript Language Server Path'
+    description: 'Path to the typescript-language-server executable. If empty, the system PATH will be used.'
