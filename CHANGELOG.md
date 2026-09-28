@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 - Add an opt-in TypeScript 7 native LSP engine (`tsc --lsp --stdio`).
+- Auto-install the selected server globally with npm when it is missing.
 - Register TS and JS extensions through one provider with the correct language IDs.
 - Manage servers in Lumide’s LSP & Agents panel; replace the ineffective restart command with status.
 - Update the SDK dependency to 1.11.0.

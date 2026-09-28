@@ -45,16 +45,14 @@ class TypeScriptPlugin extends LumidePlugin {
   Future<void> onActivate(LumideContext context) async {
     log('$_logPrefix $_pluginName plugin activated');
 
-    final configuredEngine =
-        await context.workspace.getConfiguration('typescript-lsp.engine')
-            as String?;
+    final configuredEngine = await context.workspace
+        .getConfiguration('typescript-lsp.engine') as String?;
     _engine = switch (configuredEngine) {
       'native' => 'native',
       _ => 'legacy',
     };
-    final customPath =
-        await context.workspace.getConfiguration('typescript-lsp.path')
-            as String?;
+    final customPath = await context.workspace
+        .getConfiguration('typescript-lsp.path') as String?;
     final configuredPath = customPath?.trim();
     _lspCommand = configuredPath ?? '';
     if (_lspCommand.isEmpty) {
@@ -68,28 +66,45 @@ class TypeScriptPlugin extends LumidePlugin {
       _ => const ['--stdio'],
     };
 
-    try {
-      final version = await context.shell.run(_lspCommand, const ['--version']);
-      if (version.exitCode != 0) throw StateError('Non-zero exit code');
-      if (_engine == 'native' &&
-          !RegExp(
-            r'\bVersion\s+(?:[7-9]|\d{2,})\.\d+',
-          ).hasMatch(version.stdout)) {
-        throw StateError('TypeScript 7 or newer is required for native LSP.');
-      }
-    } catch (e) {
+    if (!await _isServerAvailable(context, _lspCommand)) {
       final installCommand = switch (_engine) {
-        'native' => 'npm install -g typescript@latest',
-        _ => 'npm install -g typescript-language-server typescript',
+        'native' => const ['install', '-g', 'typescript@latest'],
+        _ => const [
+            'install',
+            '-g',
+            'typescript-language-server',
+            'typescript@6'
+          ],
       };
       await context.window.showMessage(
-        'Could not use $_lspCommand for $_pluginName language support: $e\n\n'
-        'Install the selected engine with: $installCommand',
+        'Installing the $_pluginName language server with npm...',
         title: _pluginName,
-        type: MessageType.warning,
       );
-      log('$_logPrefix $_lspCommand unavailable, aborting');
-      return;
+      try {
+        final result = await context.shell.run('npm', installCommand);
+        if (result.exitCode != 0) {
+          throw StateError('${result.stderr}\n${result.stdout}'.trim());
+        }
+        _lspCommand = switch (_engine) {
+          'native' => _nativeCommand,
+          _ => _legacyCommand,
+        };
+        if (!await _isServerAvailable(context, _lspCommand)) {
+          throw StateError(
+            'npm finished, but $_lspCommand is missing or incompatible.',
+          );
+        }
+      } catch (e) {
+        final installText = 'npm ${installCommand.join(' ')}';
+        await context.window.showMessage(
+          'Could not install a usable $_pluginName language server: $e\n\n'
+          'Run `$installText` or configure a custom executable.',
+          title: _pluginName,
+          type: MessageType.warning,
+        );
+        log('$_logPrefix $_lspCommand unavailable after install attempt');
+        return;
+      }
     }
 
     await context.languages.registerLanguageServer(
@@ -115,7 +130,7 @@ class TypeScriptPlugin extends LumidePlugin {
             'native' => 'TypeScript 7 (Go)',
             _ => 'typescript-language-server',
           }}\n\n'
-          'Manage Start, Restart, Stop, and Disable in Lumide’s LSP & Agents panel.\n'
+          'Manage Start, Restart, Stop, Disable, and Enable in Lumide’s LSP & Agents panel.\n'
           'Reopen the workspace after changing the engine or executable path.',
           title: '$_pluginName Language Server',
         );
@@ -123,6 +138,22 @@ class TypeScriptPlugin extends LumidePlugin {
     );
 
     log('$_logPrefix $_lspCommand registered for TypeScript and JavaScript');
+  }
+
+  Future<bool> _isServerAvailable(
+    LumideContext context,
+    String command,
+  ) async {
+    try {
+      final version = await context.shell.run(command, const ['--version']);
+      if (version.exitCode != 0) return false;
+      if (_engine != 'native') return true;
+      return RegExp(r'\bVersion\s+(?:[7-9]|\d{2,})\.\d+')
+          .hasMatch(version.stdout);
+    } catch (error) {
+      log('$_logPrefix Could not verify $command: $error');
+      return false;
+    }
   }
 
   @override

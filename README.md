@@ -30,8 +30,9 @@ Access these via the Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`):
 ## Requirements
 
 - **Node.js**: A Node.js runtime must be installed.
-- **Legacy engine**: `npm install -g typescript typescript-language-server`
-- **Native engine**: TypeScript 7 or newer (`npm install -g typescript@latest`). Set `typescript-lsp.engine` to `native`.
+- **Automatic install**: Lumide installs the selected server globally with npm if it is missing.
+- **Legacy engine**: Installs `typescript-language-server` with TypeScript 6 for compiler API compatibility.
+- **Native engine**: Installs TypeScript 7 or newer. Set `typescript-lsp.engine` to `native`.
 - **Custom executable**: Set `typescript-lsp.path` to the selected engine’s executable. Reopen the workspace after changing the engine or path.
 - Manage Start, Restart, Stop, Disable, and Enable in Lumide’s **LSP & Agents** panel.
 
