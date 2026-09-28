@@ -7,16 +7,31 @@ activation_events:
   - 'workspaceContains:tsconfig.json'
   - 'workspaceContains:package.json'
   - 'workspaceContains:*.ts'
+  - 'workspaceContains:*.tsx'
+  - 'workspaceContains:*.mts'
+  - 'workspaceContains:*.cts'
   - 'workspaceContains:*.js'
+  - 'workspaceContains:*.jsx'
+  - 'workspaceContains:*.mjs'
+  - 'workspaceContains:*.cjs'
 
 permissions:
   - shell:
       - typescript-language-server
+      - tsc
       - node
       - npm
 
 configuration:
+  - key: typescript-lsp.engine
+    type: string
+    default: 'legacy'
+    enum:
+      - legacy
+      - native
+    title: 'TypeScript Language Server Engine'
+    description: 'Choose typescript-language-server or the native TypeScript 7+ LSP. Use legacy for framework language-server plugins such as Vue, Svelte, Astro, and Angular.'
   - key: typescript-lsp.path
     type: filePath
-    title: 'TypeScript Language Server Path'
-    description: 'Path to the typescript-language-server executable. If empty, the system PATH will be used.'
+    title: 'TypeScript Server Executable'
+    description: 'Optional executable override. Defaults to typescript-language-server in legacy mode or tsc in native mode. Reopen the workspace after changing this setting.'

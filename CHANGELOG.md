@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+- Add an opt-in TypeScript 7 native LSP engine (`tsc --lsp --stdio`).
+- Register TS and JS extensions through one provider with the correct language IDs.
+- Manage servers in Lumide’s LSP & Agents panel; replace the ineffective restart command with status.
+- Update the SDK dependency to 1.11.0.
+
 ## 1.0.1
 
 - Bump `lumide_api` dependency to `1.1.0`.
