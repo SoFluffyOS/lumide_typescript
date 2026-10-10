@@ -25,11 +25,11 @@ class TypeScriptPlugin extends LumidePlugin {
   ];
   static const _extensionLanguageMap = {
     '.ts': 'typescript',
-    '.tsx': 'typescript',
+    '.tsx': 'typescriptreact',
     '.mts': 'typescript',
     '.cts': 'typescript',
     '.js': 'javascript',
-    '.jsx': 'javascript',
+    '.jsx': 'javascriptreact',
     '.mjs': 'javascript',
     '.cjs': 'javascript',
   };
